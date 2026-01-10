@@ -1,13 +1,8 @@
 {
-  "name": "my-pern-app",
+  "name": "tcms",
   "version": "1.0.0",
-  "description": "PERN Stack with Supabase",
-  "main": "backend/app.js",
   "scripts": {
-    "start": "node backend/app.js",
-    "dev": "nodemon backend/app.js",
-    "install-frontend": "npm install --prefix frontend",
-    "build-frontend": "npm run build --prefix frontend",
+    "start": "node backend/server.js",
     "render-build": "npm install --prefix backend && npm install --legacy-peer-deps --prefix frontend && npm run build --prefix frontend"
   },
   "engines": {

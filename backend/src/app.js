@@ -1,9 +1,14 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 import routes from "./routes.js";
-
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./swagger.js";
+
+// ES Module fix for __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -22,10 +27,23 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", message: "Server is running" });
 });
 
-// 404 Handler
-app.use((req, res) => {
-  res.status(404).json({ message: "Route not found" });
-});
+// ============== Serve React Frontend (Vite) ==============
+if (process.env.NODE_ENV === "production") {
+  // Serve static files from frontend/dist (Vite output)
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+  // Handle React routing - return index.html for all non-API routes
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
+  });
+}
+
+// 404 Handler (Move AFTER the frontend serving in production)
+if (process.env.NODE_ENV !== "production") {
+  app.use((req, res) => {
+    res.status(404).json({ message: "Route not found" });
+  });
+}
 
 // Error Handler Middleware
 app.use((err, req, res, _next) => {
