@@ -29,10 +29,11 @@ app.get("/health", (req, res) => {
 
 // ============== Serve React Frontend (Vite) ==============
 if (process.env.NODE_ENV === "production") {
-  // Path goes up 2 levels: src -> backend -> root -> frontend/dist
+  // Serve static files
   app.use(express.static(path.join(__dirname, "../../frontend/dist")));
 
-  app.get("*", (req, res) => {
+  // ✅ Express 5.x syntax - use "{*splat}" instead of "*"
+  app.get("/{*splat}", (req, res) => {
     res.sendFile(path.join(__dirname, "../../frontend/dist", "index.html"));
   });
 }
