@@ -29,16 +29,15 @@ app.get("/health", (req, res) => {
 
 // ============== Serve React Frontend (Vite) ==============
 if (process.env.NODE_ENV === "production") {
-  // Serve static files from frontend/dist (Vite output)
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  // Path goes up 2 levels: src -> backend -> root -> frontend/dist
+  app.use(express.static(path.join(__dirname, "../../frontend/dist")));
 
-  // Handle React routing - return index.html for all non-API routes
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
+    res.sendFile(path.join(__dirname, "../../frontend/dist", "index.html"));
   });
 }
 
-// 404 Handler (Move AFTER the frontend serving in production)
+// 404 Handler
 if (process.env.NODE_ENV !== "production") {
   app.use((req, res) => {
     res.status(404).json({ message: "Route not found" });

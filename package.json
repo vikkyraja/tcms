@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node backend/src/server.js",
-    
     "render-build": "npm install --prefix backend && npm install --legacy-peer-deps --prefix frontend && npm run build --prefix frontend"
   },
   "engines": {
