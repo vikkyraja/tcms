@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "/api",
+  // Uses environment variable - automatically switches based on mode
+  baseURL: import.meta.env.VITE_API_URL || "/api",
 });
 
 api.interceptors.request.use((config) => {
