@@ -3,6 +3,7 @@ import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Projects from "../pages/projects/Projects";
+import ProjectS from "../pages/projects/Projects";
 import TestCases from "../pages/testcases/TestCases";
 import TestSuites from "../pages/testsuites/TestSuites";
 import Executions from "../pages/executions/Executions";
@@ -13,6 +14,7 @@ import EditTestCase from "../pages/testcases/EditTestCase";
 
 import PrivateRoute from "./PrivateRoute";
 import MainLayout from "../components/layout/MainLayout";
+import ProjectSelector from "../pages/projects/ProjectSelector";
 
 export default function AppRoutes() {
   return (
@@ -34,6 +36,10 @@ export default function AppRoutes() {
       <Route
         path="/projects"
         element={<PrivateRoute><MainLayout><Projects /></MainLayout></PrivateRoute>}
+      />
+      <Route
+        path="/projects/select"
+        element={<PrivateRoute><MainLayout><ProjectSelector /></MainLayout></PrivateRoute>}
       />
       <Route
         path="/testcases"

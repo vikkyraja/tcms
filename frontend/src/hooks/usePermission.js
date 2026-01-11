@@ -1,8 +1,20 @@
 import { useAuth } from "./useAuth";
-import { PERMISSIONS } from "../utils/permissions";
 
-export const usePermission = (permission) => {
+export default function usePermissions() {
   const { role } = useAuth();
-  return PERMISSIONS[role]?.includes("ALL") ||
-         PERMISSIONS[role]?.includes(permission);
-};
+
+  return {
+    canManageProjects:
+      role === "ADMIN" || role === "TEST_LEAD",
+
+    canManageTestCases:
+      role === "ADMIN" || role === "TEST_LEAD",
+
+    canExecuteTests:
+      role === "ADMIN" ||
+      role === "TEST_LEAD" ||
+      role === "TESTER",
+
+    isReadOnly: role === "READ_ONLY",
+  };
+}

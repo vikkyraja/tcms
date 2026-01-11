@@ -2,37 +2,31 @@ import { useEffect, useState } from "react";
 import api from "../../api/axios";
 import { useProject } from "../../context/ProjectContext";
 
-export default function Project() {
+export default function ProjectSelector() {
   const { project, selectProject } = useProject();
   const [projects, setProjects] = useState([]);
 
   useEffect(() => {
     api.get("/projects").then((res) => {
-      const list = res.data.data || res.data || [];
-      setProjects(list);
-
-      // auto-select first project once
-      if (!project && list.length > 0) {
-        selectProject(list[0]);
-      }
+      setProjects(res.data);
     });
   }, []);
 
   return (
     <select
       className="border px-3 py-2 rounded text-sm"
-      value={project?.id ?? ""}
+      value={project?.id || ""}
       onChange={(e) => {
         const selected = projects.find(
-          (p) => String(p.id) === e.target.value
+          (p) => p.id === e.target.value
         );
-        selectProject(selected || null);
+        selectProject(selected);
       }}
     >
       <option value="">Select Project</option>
 
       {projects.map((p) => (
-        <option key={p.id} value={String(p.id)}>
+        <option key={p.id} value={p.id}>
           {p.name}
         </option>
       ))}

@@ -1,9 +1,9 @@
 import express from "express";
-import { getAllTestCases } from "./testcase.controller.js";
+import { fetchUsers } from "./users.controller.js";
 import authMiddleware from "../../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/", authMiddleware, getAllTestCases);
+router.get("/", authMiddleware, fetchUsers);
 
 export default router;

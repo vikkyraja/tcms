@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { auth } from "../../middlewares/auth.middleware.js";
+import authMiddleware  from "../../middlewares/auth.middleware.js";
 import { getSummary } from "./analytics.controller.js";
 
 const router = Router();
@@ -11,7 +11,7 @@ const router = Router();
  *     summary: Get dashboard analytics summary
  *     tags: [Analytics]
  *     security:
- *       - bearerAuth: []
+ *       - bearerauthMiddleware: []
  *     responses:
  *       200:
  *         description: Dashboard analytics data
@@ -33,6 +33,6 @@ const router = Router();
  *                 skipped:
  *                   type: number
  */
-router.get("/summary", auth, getSummary);
+router.get("/summary", authMiddleware, getSummary);
 
 export default router;

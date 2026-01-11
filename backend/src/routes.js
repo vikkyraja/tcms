@@ -1,12 +1,16 @@
 import authRoutes from "./modules/auth/auth.routes.js";
-import testcaseRoutes from "./modules/testcases/testcase.routes.js";
-import executionRoutes from "./modules/executions/execution.routes.js";
+import userRoutes from "./modules/users/users.routes.js";
+import testCaseRoutes from "./modules/testcases/testcase.routes.js";
 import analyticsRoutes from "./modules/analytics/analytics.routes.js";
+import projectRoutes from "./modules/projects/projects.routes.js";
+import testSuiteRoutes from "./modules/testsuites/testsuites.routes.js";
 
 export default function routes(app) {
   app.use("/api/auth", authRoutes);
-  app.use("/api/testcases", testcaseRoutes);
-  app.use("/api/executions", executionRoutes);
-app.use("/api/analytics", analyticsRoutes);
-  app.get("/api/health", (_, res) => res.json({ status: "OK" }));
+  app.use("/api/users", userRoutes);
+  app.use("/api/testcases", testCaseRoutes);
+  app.use("/api/analytics", analyticsRoutes);
+  app.use("/api/projects", projectRoutes);
+  app.use("/api/testsuites", testSuiteRoutes);
+
 }

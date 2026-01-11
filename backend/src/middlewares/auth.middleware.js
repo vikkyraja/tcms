@@ -1,36 +1,29 @@
 import jwt from "jsonwebtoken";
 
-export function auth(req, res, next) {
+export default function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "No token provided" });
-    }
-
     const token = authHeader.split(" ")[1];
 
-    // ✅ Use process.env.JWT_SECRET (NOT globalThis.__ENV__)
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    // 🔑 THIS IS CRITICAL
+    req.user = {
+      id: decoded.id,
+      role: decoded.role,
+      email: decoded.email,
+    };
+
     next();
-  } catch (error) {
-    console.error("Auth error:", error.message);
-    return res.status(401).json({ message: "Invalid or expired token" });
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid token" });
   }
-}
-
-// Optional: Role-based authorization middleware
-export function authorize(...roles) {
-  return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: "Access denied" });
-    }
-
-    next();
-  };
 }
