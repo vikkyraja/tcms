@@ -2,28 +2,25 @@ import { useAuth } from "../../hooks/useAuth";
 
 export default function BulkActions({ selectedCount, onDelete, onAssign }) {
   const { role } = useAuth();
+  const canManage = ["ADMIN", "TEST_LEAD"].includes(role);
 
-  if (selectedCount === 0) return null;
-
-  const canManage = role === "admin" || role === "test-lead";
+  if (!selectedCount) return null;
 
   return (
-    <div className="bg-indigo-50 border border-indigo-200 rounded p-3 flex items-center justify-between">
-      <span className="text-sm">
-        {selectedCount} selected
-      </span>
+    <div className="bg-indigo-50 border p-3 rounded flex justify-between">
+      <span>{selectedCount} selected</span>
 
       {canManage && (
         <div className="flex gap-2">
           <button
             onClick={onAssign}
-            className="px-3 py-1.5 text-sm rounded bg-indigo-600 text-white"
+            className="bg-indigo-600 text-white px-3 py-1 rounded"
           >
-            Assign to Suite
+            Assign Suite
           </button>
           <button
             onClick={onDelete}
-            className="px-3 py-1.5 text-sm rounded bg-red-600 text-white"
+            className="bg-red-600 text-white px-3 py-1 rounded"
           >
             Delete
           </button>

@@ -4,6 +4,9 @@ import testCaseRoutes from "./modules/testcases/testcase.routes.js";
 import analyticsRoutes from "./modules/analytics/analytics.routes.js";
 import projectRoutes from "./modules/projects/projects.routes.js";
 import testSuiteRoutes from "./modules/testsuites/testsuites.routes.js";
+import executionRoutes from "./modules/executions/execution.routes.js";
+import summaryRoutes from "./modules/analytics/analytics.routes.js";
+
 
 export default function routes(app) {
   app.use("/api/auth", authRoutes);
@@ -12,5 +15,8 @@ export default function routes(app) {
   app.use("/api/analytics", analyticsRoutes);
   app.use("/api/projects", projectRoutes);
   app.use("/api/testsuites", testSuiteRoutes);
+app.use("/api/executions", executionRoutes);
+app.use("/api/summary", summaryRoutes);
+
 
 }

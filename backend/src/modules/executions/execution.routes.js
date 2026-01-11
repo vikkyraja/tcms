@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { auth } from "../../middlewares/auth.middleware.js";
+import authMiddleware  from "../../middlewares/auth.middleware.js";
 import { execute } from "./execution.controller.js";
 
 const router = Router();
@@ -29,6 +29,6 @@ const router = Router();
  *       201:
  *         description: Test executed
  */
-router.post("/", auth, execute);
+router.post("/", authMiddleware, execute);
 
 export default router;

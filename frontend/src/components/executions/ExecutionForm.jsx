@@ -1,14 +1,16 @@
 import { useState } from "react";
 import AttachmentUpload from "./AttachmentUpload";
 import { useAuth } from "../../hooks/useAuth";
+import api from "../../api/axios";
 
 export default function ExecutionForm({ testCase }) {
   const { role } = useAuth();
-  const canExecute = ["admin", "test-lead", "tester"].includes(role);
+  const canExecute = ["ADMIN", "TEST_LEAD", "TESTER"].includes(role);
 
   const [status, setStatus] = useState("Pass");
   const [comment, setComment] = useState("");
   const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   if (!canExecute) {
     return (
@@ -18,19 +20,17 @@ export default function ExecutionForm({ testCase }) {
     );
   }
 
-  const submit = () => {
-    alert(
-      JSON.stringify(
-        {
-          testCaseId: testCase.id,
-          status,
-          comment,
-          filesCount: files.length,
-        },
-        null,
-        2
-      )
-    );
+  const submit = async () => {
+    setLoading(true);
+
+    await api.post("/executions", {
+      test_case_id: testCase.id,
+      status,
+      comment,
+    });
+
+    setLoading(false);
+    alert("Execution saved");
   };
 
   return (
@@ -70,10 +70,11 @@ export default function ExecutionForm({ testCase }) {
       <AttachmentUpload onAdd={setFiles} />
 
       <button
+        disabled={loading}
         onClick={submit}
         className="bg-green-600 text-white px-4 py-2 rounded"
       >
-        Submit Execution
+        {loading ? "Saving…" : "Submit Execution"}
       </button>
     </div>
   );

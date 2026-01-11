@@ -1,20 +1,14 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
 import { useProject } from "../../context/ProjectContext";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import Pagination from "../../components/testcases/Pagination";
 import usePermissions from "../../hooks/usePermission";
 
-
-
-
 export default function TestCases() {
-  
-const { canManageTestCases, canExecuteTests } = usePermissions();
-  const { role } = useAuth();
   const { project } = useProject();
   const navigate = useNavigate();
+  const { canManageTestCases, canExecuteTests } = usePermissions();
 
   const [cases, setCases] = useState([]);
   const [pagination, setPagination] = useState({
@@ -33,7 +27,7 @@ const { canManageTestCases, canExecuteTests } = usePermissions();
     setLoading(true);
 
     api
-      .get(`/testcases`, {
+      .get("/testcases", {
         params: {
           page,
           limit: 10,
@@ -41,20 +35,20 @@ const { canManageTestCases, canExecuteTests } = usePermissions();
         },
       })
       .then((res) => {
-        // ✅ SUPPORT BOTH API SHAPES
-        const responseData = res.data?.data ?? res.data ?? [];
-        const responsePagination =
-          res.data?.pagination ?? { page: 1, totalPages: 1 };
-
-        setCases(responseData);
-        setPagination(responsePagination);
+        setCases(res.data?.data ?? []);
+        setPagination(
+          res.data?.pagination ?? { page: 1, totalPages: 1 }
+        );
       })
-      .catch((err) => {
-        console.error("Failed to load test cases", err);
-        setCases([]);
-      })
+      .catch(() => setCases([]))
       .finally(() => setLoading(false));
   }, [page, project]);
+const deleteCase = async (id) => {
+  if (!window.confirm("Delete this test case?")) return;
+
+  await api.delete(`/testcases/${id}`);
+  setCases((prev) => prev.filter((tc) => tc.id !== id));
+};
 
   if (!project) {
     return (
@@ -70,38 +64,28 @@ const { canManageTestCases, canExecuteTests } = usePermissions();
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">🧪 Test Cases</h1>
 
+        {canManageTestCases && (
+          <button
+            onClick={() => navigate("/testcases/new")}
+            className="bg-indigo-600 text-white px-4 py-2 rounded"
+          >
+            + New Test Case
+          </button>
+        )}
+     
 
       </div>
-{canManageTestCases && (
-  <button
-    onClick={() => navigate("/testcases/new")}
-    className="bg-indigo-600 text-white px-4 py-2 rounded"
-  >
-    + New Test Case
-  </button>
-)}
-{canExecuteTests && (
-  <button
-    onClick={() => navigate(`/executions/${tc.id}`)}
-    className="bg-indigo-600 text-white px-4 py-2 rounded ml-4 " 
-  >
-    Execute
-  </button>
-)}
 
-      {/* Loading */}
       {loading && (
         <p className="text-gray-500">Loading test cases…</p>
       )}
 
-      {/* Empty State */}
       {!loading && cases.length === 0 && (
         <div className="bg-white border rounded p-6 text-center text-gray-500">
           No test cases found for this project.
         </div>
       )}
 
-      {/* Table */}
       {!loading && cases.length > 0 && (
         <div className="bg-white border rounded overflow-x-auto">
           <table className="min-w-full text-sm">
@@ -129,26 +113,36 @@ const { canManageTestCases, canExecuteTests } = usePermissions();
                   </td>
 
                   <td className="p-3 flex gap-3 justify-center">
-                    <button
-                      onClick={() =>
-                        navigate(`/executions/${tc.id}`)
-                      }
-                      className="text-green-600"
-                    >
-                      Execute
-                    </button>
-
-                    {(role === "ADMIN" ||
-                      role === "TEST_LEAD") && (
+                    {canExecuteTests && (
                       <button
                         onClick={() =>
-                          navigate(`/testcases/${tc.id}/edit`)
+                          navigate("/executions", {
+                            state: { testCaseId: tc.id },
+                          })
                         }
-                        className="text-blue-600"
+                        className="text-green-600"
                       >
-                        Edit
+                        Execute
                       </button>
                     )}
+
+                     {canManageTestCases && (
+  <button
+    onClick={() => navigate(`/testcases/${tc.id}/edit`)}
+    className="text-blue-600"
+  >
+    Edit
+  </button>
+)}
+
+{canManageTestCases && (
+  <button
+    onClick={() => deleteCase(tc.id)}
+    className="text-red-600"
+  >
+    Delete
+  </button>
+)}
                   </td>
                 </tr>
               ))}
@@ -157,8 +151,7 @@ const { canManageTestCases, canExecuteTests } = usePermissions();
         </div>
       )}
 
-      {/* Pagination */}
-      {pagination?.totalPages > 1 && (
+      {pagination.totalPages > 1 && (
         <Pagination
           page={pagination.page}
           totalPages={pagination.totalPages}
