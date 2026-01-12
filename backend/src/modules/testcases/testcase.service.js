@@ -1,11 +1,7 @@
 import supabase from "../../config/supabase.js";
 
-/* LIST (PAGINATED) */
-export const getTestCasesPaginated = async ({
-  projectId,
-  page = 1,
-  limit = 10,
-}) => {
+/* ---------------- GET PAGINATED ---------------- */
+export async function getTestCasesPaginated({ projectId, page = 1, limit = 10 }) {
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
@@ -20,6 +16,7 @@ export const getTestCasesPaginated = async ({
   }
 
   const { data, count, error } = await query;
+
   if (error) throw error;
 
   return {
@@ -31,10 +28,10 @@ export const getTestCasesPaginated = async ({
       totalPages: Math.ceil(count / limit),
     },
   };
-};
+}
 
-/* GET BY ID */
-export const getTestCaseById = async (id) => {
+/* ---------------- GET BY ID ---------------- */
+export async function getTestCaseById(id) {
   const { data, error } = await supabase
     .from("test_cases")
     .select("*")
@@ -43,38 +40,51 @@ export const getTestCaseById = async (id) => {
 
   if (error) throw error;
   return data;
-};
+}
 
-/* CREATE */
-export const createTestCase = async (payload, userId) => {
+/* ---------------- CREATE ---------------- */
+export async function createTestCase(payload, userId) {
   const { data, error } = await supabase
     .from("test_cases")
     .insert({
-      ...payload,
+      project_id: payload.project_id,
+      title: payload.title,
+      description: payload.description || null,
+      priority: payload.priority || "Medium",
+      type: payload.type || null,
+      pre_conditions: payload.pre_conditions || null,
+      post_conditions: payload.post_conditions || null,
       created_by: userId,
     })
-    .select()
-    .single();
+    .select();
 
   if (error) throw error;
-  return data;
-};
+  return data[0];
+}
 
-/* UPDATE */
-export const updateTestCase = async (id, payload) => {
+/* ---------------- UPDATE ---------------- */
+export async function updateTestCase(id, payload) {
   const { data, error } = await supabase
     .from("test_cases")
-    .update(payload)
+    .update({
+      project_id: payload.project_id,
+      title: payload.title,
+      description: payload.description || null,
+      priority: payload.priority || "Medium",
+      type: payload.type || null,
+      pre_conditions: payload.pre_conditions || null,
+      post_conditions: payload.post_conditions || null,
+    })
     .eq("id", id)
-    .select()
-    .single();
+    .select();
 
   if (error) throw error;
-  return data;
-};
+  if (!data || data.length === 0) throw new Error("Update failed");
+  return data[0];
+}
 
-/* DELETE */
-export const deleteTestCase = async (id) => {
+/* ---------------- DELETE ---------------- */
+export async function deleteTestCase(id) {
   const { error } = await supabase
     .from("test_cases")
     .delete()
@@ -82,4 +92,4 @@ export const deleteTestCase = async (id) => {
 
   if (error) throw error;
   return { success: true };
-};
+}
