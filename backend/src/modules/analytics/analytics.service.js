@@ -1,21 +1,43 @@
 import supabase from "../../config/supabase.js";
 
-export async function getDashboardSummary() {
-  const { data: testCases } = await supabase
+export async function getDashboardSummary(projectId) {
+  // ---------- Test Cases ----------
+  let testCaseQuery = supabase
     .from("test_cases")
-    .select("id");
+    .select("id", { count: "exact", head: true });
 
-  const { data: executions } = await supabase
+  if (projectId) {
+    testCaseQuery = testCaseQuery.eq("project_id", projectId);
+  }
+
+  const { count: totalTestCases } = await testCaseQuery;
+
+  // ---------- Executions ----------
+  let executionQuery = supabase
     .from("test_executions")
     .select("status");
 
-  const summary = {
-    totalTestCases: testCases?.length || 0,
-    totalExecutions: executions?.length || 0,
-    passed: executions?.filter(e => e.status === "PASS").length || 0,
-    failed: executions?.filter(e => e.status === "FAIL").length || 0,
-    blocked: executions?.filter(e => e.status === "BLOCKED").length || 0,
-  };
+  if (projectId) {
+    executionQuery = executionQuery.eq("project_id", projectId);
+  }
 
-  return summary;
+  const { data: executions = [] } = await executionQuery;
+
+  return {
+    totalTestCases: totalTestCases || 0,
+    totalExecutions: executions.length,
+    passed: executions.filter(e => e.status === "Pass").length,
+    failed: executions.filter(e => e.status === "Fail").length,
+    blocked: executions.filter(e => e.status === "Blocked").length,
+    skipped: executions.filter(e => e.status === "Skipped").length,
+
+    priorityDistribution: {
+      Low: 0,
+      Medium: 0,
+      High: 0,
+      Critical: 0,
+    },
+
+    executionTrend: [], // can add later
+  };
 }

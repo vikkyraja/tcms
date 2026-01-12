@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
-import api from "../../api/axios";
+import { useMemo, useState } from "react"; // Removed useEffect as API call is gone
+// Removed 'api' import since it's no longer used for fetching
 import StatusPie from "../../components/charts/StatusPie";
 import PriorityBar from "../../components/charts/PriorityBar";
 import ExecutionTrend from "../../components/charts/ExecutionTrend";
 import { useProject } from "../../context/ProjectContext";
 
-/* 🔒 SAFE FALLBACK (USED WHEN API FAILS OR RETURNS EMPTY) */
-const FALLBACK_ANALYTICS = {
+/* 🔒 DUMMY DATA FOR ALL DASHBOARD ELEMENTS */
+// This object will now be the sole source of data for the dashboard.
+const DUMMY_ANALYTICS = {
   totalTestCases: 42,
   totalExecutions: 120,
   passed: 82,
@@ -25,42 +26,43 @@ const FALLBACK_ANALYTICS = {
     { date: "Jan 03", passed: 6, failed: 3 },
     { date: "Jan 04", passed: 10, failed: 2 },
     { date: "Jan 05", passed: 12, failed: 1 },
+    { date: "Jan 06", passed: 15, failed: 3 },
+    { date: "Jan 07", passed: 11, failed: 0 },
   ],
 };
 
 export default function Dashboard() {
   const { project } = useProject();
 
-  const [analytics, setAnalytics] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // We are no longer fetching, so loading can be false by default.
+  // The 'analytics' state is also no longer needed.
+  // const [analytics, setAnalytics] = useState(null);
+  const [loading] = useState(false); // Always false now
 
-  /* ✅ SINGLE SOURCE OF TRUTH */
-  useEffect(() => {
-    let url = "/summary";
-    if (project?.id) {
-      url += `?projectId=${project.id}`;
-    }
+  // The useEffect hook for API fetching is removed.
+  // useEffect(() => {
+  //   let url = "/analytics/summary";
+  //   if (project?.id) {
+  //     url += `?projectId=${project.id}`;
+  //   }
+  //   setLoading(true);
+  //   api.get(url) // Changed from the previous hardcoded URL for consistency.
+  //     .then((res) => {
+  //       if (res.data && Object.keys(res.data).length > 0) {
+  //         setAnalytics(res.data);
+  //       } else {
+  //         setAnalytics(null);
+  //       }
+  //     })
+  //     .catch(() => {
+  //       setAnalytics(null);
+  //     })
+  //     .finally(() => setLoading(false));
+  // }, [project]);
 
-    setLoading(true);
-
-    api
-      .get(url)
-      .then((res) => {
-        // 🛡️ VALIDATE RESPONSE
-        if (res.data && Object.keys(res.data).length > 0) {
-          setAnalytics(res.data);
-        } else {
-          setAnalytics(null);
-        }
-      })
-      .catch(() => {
-        setAnalytics(null);
-      })
-      .finally(() => setLoading(false));
-  }, [project]);
-
-  /* ✅ ALWAYS PROVIDE DATA */
-  const data = analytics ?? FALLBACK_ANALYTICS;
+  /* ✅ ALWAYS PROVIDE DUMMY DATA */
+  // 'data' now directly references our DUMMY_ANALYTICS
+  const data = DUMMY_ANALYTICS;
 
   /* ✅ CHART SAFE SHAPES */
   const statusData = useMemo(
@@ -70,6 +72,16 @@ export default function Dashboard() {
       Blocked: data.blocked ?? 0,
       Skipped: data.skipped ?? 0,
     }),
+    [data]
+  );
+
+  const priorityData = useMemo(
+    () => data.priorityDistribution, // Directly use the dummy distribution
+    [data]
+  );
+
+  const trendData = useMemo(
+    () => data.executionTrend, // Directly use the dummy trend
     [data]
   );
 
@@ -90,10 +102,11 @@ export default function Dashboard() {
         </h1>
         <p className="text-gray-500">
           Test execution insights {project ? `for ${project.name}` : ""}
+          {/* Note: This will still show project name from context if available */}
         </p>
       </div>
 
-      {/* KPI CARDS */}
+      {/* KPI CARDS - Now use DUMMY_ANALYTICS directly */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
         <Kpi title="Test Cases" value={data.totalTestCases} color="from-indigo-500 to-indigo-700" />
         <Kpi title="Executions" value={data.totalExecutions} color="from-blue-500 to-blue-700" />
@@ -102,19 +115,19 @@ export default function Dashboard() {
         <Kpi title="Blocked" value={data.blocked} color="from-yellow-500 to-yellow-700" />
       </div>
 
-      {/* CHARTS */}
+      {/* CHARTS - Now use DUMMY_ANALYTICS via memoized shapes */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChartCard title="Execution Status">
           <StatusPie data={statusData} />
         </ChartCard>
 
         <ChartCard title="Priority Distribution">
-          <PriorityBar data={data.priorityDistribution} />
+          <PriorityBar data={priorityData} />
         </ChartCard>
       </div>
 
       <ChartCard title="Execution Trend">
-        <ExecutionTrend data={data.executionTrend} />
+        <ExecutionTrend data={trendData} />
       </ChartCard>
     </div>
   );
@@ -140,4 +153,4 @@ function ChartCard({ title, children }) {
       {children}
     </div>
   );
-}
+};
